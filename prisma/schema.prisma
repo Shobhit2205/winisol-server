@@ -1,0 +1,121 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Nonce {
+  id          String    @id @default(uuid())
+  publicKey   String    @unique
+  nonce       String
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+}
+
+
+model Lottery {
+  id                          Int        @id @default(autoincrement()) 
+  lotteryName                 String
+  lotterySymbol               String
+  lotteryURI                  String
+  startTime                   Int
+  endTime                     Int 
+  price                       Decimal
+  potAmount                   Decimal    @default(0)
+  totalTickets                Int        @default(0)
+  image                       String
+  status                      LotteryStatus @default(ACTIVE)
+  winnerChosen                Boolean    @default(false) 
+  winnerPublicKey             String?
+  winnerTicketId              String?
+  sbRandomnessPubKey          String?
+  sbQueuePubKey               String?
+  winnerDeclaredTime          DateTime?
+  initializeConfigSignature   String?
+  initializeLotterySignature  String?
+  createRandomnessSignature   String?
+  commitRandomnessSignature   String?
+  revealWinnerSignature       String?
+  priceClaimed                Boolean    @default(false)
+  priceClaimedSignature       String?
+  priceClaimedTime            DateTime?
+  authorityPriceClaimedSignature String?
+  authorityPriceClaimed       Boolean    @default(false)
+  authorityPriceClaimedTime   DateTime?
+  tickets                     Ticket[]
+  createdAt                   DateTime   @default(now())
+
+  @@index([status])
+}
+
+model LimitedLottery {
+  id                          Int        @id @default(autoincrement()) 
+  lotteryName                 String
+  lotterySymbol               String
+  lotteryURI                  String
+  price                       Decimal
+  totalPotAmount              Decimal    @default(0)
+  totalTickets                Int        @default(0)
+  ticketBought                LimitedLotteryTicket[]      
+  numberOfTicketSold          Int        @default(0)
+  image                       String
+  status                      LotteryStatus @default(ACTIVE)
+  winnerChosen                Boolean    @default(false) 
+  winnerPublicKey             String?
+  winnerTicketId              String?
+  sbRandomnessPubKey          String?
+  sbQueuePubKey               String?
+  winnerDeclaredTime          DateTime?
+  initializeConfigSignature   String?
+  initializeLotterySignature  String?
+  createRandomnessSignature   String?
+  commitRandomnessSignature   String?
+  revealWinnerSignature       String?
+  priceClaimed                Boolean    @default(false)
+  priceClaimedSignature       String?
+  priceClaimedTime            DateTime?
+  authorityPriceClaimedSignature String?
+  authorityPriceClaimed       Boolean    @default(false)
+  authorityPriceClaimedTime   DateTime?
+  createdAt                  DateTime  @default(now())
+
+}
+
+model LimitedLotteryTicket {
+  id                          Int        @id @default(autoincrement())
+  lottery                    LimitedLottery @relation(fields: [lotteryId], references: [id], onDelete: Cascade)
+  lotteryId                  Int
+  ticketId                   String    @unique
+  buyerPublicKey             String
+  ticketSignature            String    @unique
+  createdAt                  DateTime  @default(now())
+  @@index([lotteryId, ticketId, buyerPublicKey])
+}
+
+
+model Ticket {
+  id                  Int       @id @default(autoincrement())
+  lottery             Lottery   @relation(fields: [lotteryId], references: [id], onDelete: Cascade)
+  lotteryId           Int
+  ticketId            String    @unique
+  buyerPublicKey      String
+  ticketSignature     String    @unique
+  createdAt           DateTime  @default(now())
+
+  @@index([lotteryId, ticketId, buyerPublicKey])
+}
+
+enum LotteryStatus {
+  ACTIVE
+  COMPLETED
+}
