@@ -5,6 +5,7 @@ import { verifySolanaTransaction } from "../middlewares/verifySignatureMiddlewar
 import { buyLimitedLotteryTicketController, 
     claimLimitedLotteryWinningsController, 
     commitLimitedLotteryRandomnessController, 
+    completeLotteryController, 
     createLimitedLotteryController, 
     createLimitedLotteryRandomnessController, 
     getAllLimitedLottriesController, 
@@ -38,5 +39,7 @@ router.put("/reveal-limited-lottery-winner", verifyUserToken, revealLimitedLotte
 router.put("/claim-limited-lottery-winnings", verifySolanaTransaction("ClaimLimitedLotteryWinnings"), claimLimitedLotteryWinningsController);
 
 router.put("/limited-lottery-authority-transfer", verifyUserToken, limitedLotteryAuthorityWinningsController);
+
+router.put("/update-lottery-status", verifyUserToken, completeLotteryController)
 
 export default router;

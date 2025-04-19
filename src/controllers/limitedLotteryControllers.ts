@@ -342,16 +342,22 @@ export const revealLimitedLotteryWinnerController = async (req: Request, res: Re
         }
 
         const logMessage = transaction.meta?.logMessages?.find(log => log.includes("Winner Ticket"));
-        const ticketIdRegex = /([a-zA-Z\s]+) #(\d+)-(\d+)/;
-        const match = logMessage?.match(ticketIdRegex);
+        // const ticketIdRegex = /([a-zA-Z\s]+) #(\d+)-(\d+)/;
+        const ticketRegex = /Winner Ticket\s*:\s*([\w\s]+)#(\d+)-(\d+)/;
+        const match = logMessage?.match(ticketRegex);
+        // console.log(match);
 
         if (!match) {
             res.status(400).json({ success: false, message: "Invalid ticket ID format in logs" });
             return;
         }
 
-        const ticketId = match[0].trim(); 
-        console.log(ticketId);
+        const lotteryName = match[1].trim();
+        const currentLotteryId = parseInt(match[2]);        
+        const ticketNumber = parseInt(match[3]);
+        const ticketId = `${lotteryName} #${currentLotteryId}-${ticketNumber}`;
+
+        // console.log(ticketId);
 
         const ticket = await prisma.limitedLotteryTicket.findUnique({
             where: { ticketId },
@@ -364,9 +370,7 @@ export const revealLimitedLotteryWinnerController = async (req: Request, res: Re
         }
 
         const winnerPublicKey = ticket.buyerPublicKey;
-        // console.log(winnerPublicKey);
 
-        // Update the lottery with the winner's details
         const lottery = await prisma.limitedLottery.update({
             where: { id: lotteryId },
             data: {
@@ -491,5 +495,49 @@ export const limitedLotteryAuthorityWinningsController = async (req: Request, re
             message: "Error revealing winner", 
             error 
         });
+    }
+};
+
+export const completeLotteryController = async (req: Request, res: Response): Promise<void> => {
+    const { lotteryId } = req.body;
+  
+    try {
+      const lottery = await prisma.limitedLottery.findUnique({
+        where: { id: parseInt(lotteryId, 10) },
+      });
+  
+      if (!lottery) {
+        res.status(404).json({ message: 'Lottery not found' });
+        return;
+      }
+  
+      if (
+        lottery.winnerChosen &&
+        lottery.priceClaimed &&
+        lottery.authorityPriceClaimed
+      ) {
+        const updatedLottery = await prisma.limitedLottery.update({
+          where: { id: lottery.id },
+          data: { status: 'COMPLETED' },
+        });
+  
+        res.status(200).json({
+            success: true,
+          message: 'Lottery status updated to COMPLETED',
+          lottery: updatedLottery,
+        });
+        return;
+      }
+  
+      res.status(400).json({
+        success: false,
+        message: 'Cannot complete the lottery. Ensure winner chosen, price claimed by winner and authority.',
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ 
+        success: false,
+        message: 'Internal server error'
+      });
     }
 };

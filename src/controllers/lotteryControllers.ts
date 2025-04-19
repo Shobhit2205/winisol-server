@@ -396,16 +396,18 @@ export const revealWinnerController = async (req: Request, res: Response): Promi
         }
 
         const logMessage = transaction.meta?.logMessages?.find(log => log.includes("Winner Ticket"));
-        const ticketIdRegex = /([a-zA-Z\s]+) #(\d+)-(\d+)/;
-        const match = logMessage?.match(ticketIdRegex);
+        const ticketRegex = /Winner Ticket\s*:\s*([\w\s]+)#(\d+)-(\d+)/;
+        const match = logMessage?.match(ticketRegex);
 
         if (!match) {
             res.status(400).json({ success: false, message: "Invalid ticket ID format in logs" });
             return;
         }
 
-        const ticketId = match[0].trim(); 
-        console.log(ticketId);
+        const lotteryName = match[1].trim();
+        const currentLotteryId = parseInt(match[2]);        
+        const ticketNumber = parseInt(match[3]);
+        const ticketId = `${lotteryName} #${currentLotteryId}-${ticketNumber}`;
 
         const ticket = await prisma.ticket.findUnique({
             where: { ticketId },

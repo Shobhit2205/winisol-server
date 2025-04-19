@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import lotteryRoutes from './routes/lotteryRoutes';
 import authRoutes from './routes/authRoutes';
 import limitedLotteryRoutes from './routes/limitedLotteryRoutes';
+import commonLotteryRoutes from './routes/commonLotteryRoutes';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use(express.json());
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/lottery', lotteryRoutes);
 app.use('/api/v1/limited-lottery', limitedLotteryRoutes);
+app.use('/api/v1/common', commonLotteryRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on PORT: ${PORT}`);
