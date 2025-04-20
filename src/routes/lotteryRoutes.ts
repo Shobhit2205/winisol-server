@@ -7,6 +7,7 @@ import {
   completeLotteryController,
   createLotteryController,
   createRandomnessController,
+  deleteLotteryController,
   getAllLottriesController,
   getRandomnessKeysController,
   getSingleLotteryController,
@@ -39,5 +40,6 @@ router.put("/claim-winnings", verifySolanaTransaction("ClaimWinnings"), claimWin
 router.put("/authority-transfer", verifyUserToken, authorityWinningsController);
 router.get("/get-winner-by-publicKey/:publicKey", getWinnerByPublicKeyController);
 router.put("/update-lottery-status", verifyUserToken, completeLotteryController)
+router.delete("/delete-lottery/:id", verifyUserToken, deleteLotteryController);
 
 export default router;

@@ -709,3 +709,42 @@ export const completeLotteryController = async (req: Request, res: Response): Pr
       });
     }
 };
+
+export const deleteLotteryController = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+        if(!id) {
+            res.status(400).json({
+                success: false,
+                message: "Missing lottery ID",
+            });
+            return;
+        }
+        const lottery = await prisma.lottery.findUnique({
+            where: { id: parseInt(id) },
+        });
+        if (!lottery) {
+            res.status(404).json({
+                success: false,
+                message: "Lottery not found",
+            });
+            return;
+        }
+
+        await prisma.lottery.delete({
+            where: { id: parseInt(id) },
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Lottery deleted successfully",
+        });
+    } catch (error) {
+        console.log('error in deleteLotteryController', error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error,
+        });
+    }
+};

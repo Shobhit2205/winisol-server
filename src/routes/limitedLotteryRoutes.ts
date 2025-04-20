@@ -8,6 +8,7 @@ import { buyLimitedLotteryTicketController,
     completeLotteryController, 
     createLimitedLotteryController, 
     createLimitedLotteryRandomnessController, 
+    deleteLimitedLotteryController, 
     getAllLimitedLottriesController, 
     getLimitedLotteryRandomnessKeysController, 
     initializeLimitedLotteryConfigController, 
@@ -40,6 +41,8 @@ router.put("/claim-limited-lottery-winnings", verifySolanaTransaction("ClaimLimi
 
 router.put("/limited-lottery-authority-transfer", verifyUserToken, limitedLotteryAuthorityWinningsController);
 
-router.put("/update-lottery-status", verifyUserToken, completeLotteryController)
+router.put("/update-lottery-status", verifyUserToken, completeLotteryController);
+
+router.delete("/delete-lottery/:id", verifyUserToken, deleteLimitedLotteryController);
 
 export default router;

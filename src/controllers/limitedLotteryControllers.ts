@@ -541,3 +541,38 @@ export const completeLotteryController = async (req: Request, res: Response): Pr
       });
     }
 };
+
+export const deleteLimitedLotteryController = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { id } = req.params;
+
+        if (!id) {
+            res.status(400).json({ success: false, message: "Missing lottery ID" });
+            return;
+        }
+        const lottery = await prisma.limitedLottery.findUnique({
+            where: { id: parseInt(id) },
+        });
+        if (!lottery) {
+            res.status(404).json({ success: false, message: "Lottery not found" });
+            return;
+        }
+
+        const deletedLottery = await prisma.limitedLottery.delete({
+            where: { id: parseInt(id) },
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Lottery deleted successfully",
+            lottery: deletedLottery,
+        });
+    } catch (error) {
+        console.log('error in deleteLotteryController', error);
+        res.status(500).json({ 
+            success: false, 
+            message: "Error deleting lottery", 
+            error 
+        });
+    }
+};
