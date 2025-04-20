@@ -6,16 +6,6 @@ import nacl from "tweetnacl";
 import bs58 from 'bs58'
 import nodemailer from "nodemailer"
 
-const transporter = nodemailer.createTransport({
-    host: "mail.spacemail.com", 
-    port: 465, 
-    secure: true,
-    auth: {
-      user: process.env.EMAIL_USER, 
-      pass: process.env.EMAIL_PASS, 
-    },
-});
-
 export const getNonce = async (req: Request, res: Response): Promise<void> => {
     try {
         const { publicKey } = req.body;
@@ -118,6 +108,16 @@ export const sendMailController = async (req: Request, res: Response): Promise<v
             res.status(400).json({ success: false, message: "Missing data" });
             return;
         }
+
+        const transporter = nodemailer.createTransport({
+            host: "mail.spacemail.com", 
+            port: 465, 
+            secure: true,
+            auth: {
+              user: process.env.EMAIL_USER, 
+              pass: process.env.EMAIL_PASS, 
+            },
+        });
 
         const mailOptions = {
             from: 'WiniSol <contact@winisol.com>',
