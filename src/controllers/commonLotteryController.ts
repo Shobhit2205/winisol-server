@@ -3,7 +3,13 @@ import prisma from '../config/db';
 
 async function checkNftOwnership(publicKey: string, nftName: string): Promise<boolean> {
     try {
-      const response = await fetch(process.env.SOLANA_RPC_URL as string, {
+      const rpcUrl = process.env.SOLANA_RPC_URL;
+
+      if (!rpcUrl) {
+        console.error('SOLANA_RPC_URL environment variable is not set');
+        return false;
+      }
+      const response = await fetch(rpcUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -19,8 +25,17 @@ async function checkNftOwnership(publicKey: string, nftName: string): Promise<bo
           }
         })
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
       
       const responseData = await response.json();
+
+      if (responseData.error) {
+        console.error('RPC error:', responseData.error);
+        return false;
+      }
       interface Nft {
         content: {
           metadata: {
@@ -29,9 +44,9 @@ async function checkNftOwnership(publicKey: string, nftName: string): Promise<bo
         };
       }
 
-      const nfts: Nft[] = responseData.result.items;
+      const nfts: Nft[] = responseData?.result?.items;
 
-      return nfts.some((nft: Nft) => nft.content.metadata.name === nftName);
+      return nfts?.some((nft: Nft) => nft?.content?.metadata?.name === nftName);
       
     } catch (error) {
       console.error('Error verifying NFT ownership:', error);

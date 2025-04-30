@@ -6,7 +6,15 @@
     "dev": "nodemon src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js",
-    "start:ts": "ts-node src/index.ts"
+
+    "dev:devnet": "cp .env.devnet .env && nodemon src/index.ts",
+    "dev:mainnet": "cp .env.mainnet .env && nodemon src/index.ts",
+    
+    "start:devnet": "cp .env.devnet .env && node dist/index.js",
+    "start:mainnet": "cp .env.mainnet .env &&  node dist/index.js",
+    
+    "start:ts:devnet": "cp .env.devnet .env && ts-node src/index.ts",
+    "start:ts:mainnet": "cp .env.mainnet .env && ts-node src/index.ts"
   },
   "author": "",
   "license": "ISC",

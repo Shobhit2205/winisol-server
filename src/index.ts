@@ -26,4 +26,5 @@ app.use('/api/v1/common', commonLotteryRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server running on PORT: ${PORT}`);
+    console.log(process.env.SOLANA_ENV === 'devnet' ? 'Running on Devnet' : 'Running on Mainnet');
 });
